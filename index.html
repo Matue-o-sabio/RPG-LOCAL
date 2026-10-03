@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mestre das Sombras - RPG Solo</title>
+    <title>Chronicles of the Sandbox - RPG Solo</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,16 +13,18 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0f0f14',
-                        panelBg: '#161620',
-                        cardBg: '#1c1c2b',
+                        darkBg: '#09090e',
+                        panelBg: '#12121a',
+                        cardBg: '#191924',
+                        parchmentBg: '#1c1926',
                         goldAccent: '#d4af37',
                         goldHover: '#f3c948',
+                        goldDark: '#8a6d1c',
                         crimsonAccent: '#8b0000',
-                        crimsonBright: '#b22222',
-                        parchmentBg: '#1e1a24',
+                        crimsonBright: '#dc2626',
                         textLight: '#e2d9cc',
-                        textMuted: '#9a9488'
+                        textMuted: '#9a9488',
+                        playerBubble: '#162032'
                     },
                     fontFamily: {
                         cinzel: ['Cinzel', 'serif'],
@@ -37,241 +39,234 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=MedievalSharp&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=MedievalSharp&family=Spectral:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
-        /* Custom Scrollbar for Fantasy Theme */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #121218;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a2e2b;
-            border-radius: 4px;
-            border: 1px solid #d4af37;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d4af37;
-        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0c0c12; }
+        ::-webkit-scrollbar-thumb { background: #33291d; border-radius: 4px; border: 1px solid #d4af37; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
 
-        /* Dark Gold Border Glow */
+        /* Glowing Effects */
         .gold-border-glow {
             border: 1px solid #d4af37;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
         }
         .gold-border-glow:hover {
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
         }
 
         .crimson-glow {
-            box-shadow: 0 0 12px rgba(139, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
         }
 
-        /* Dice Roll Shake Animation */
-        @keyframes rollShake {
+        /* Card selection */
+        .tag-badge {
+            transition: all 0.2s ease;
+        }
+        .tag-badge:hover {
+            transform: translateY(-1px);
+            border-color: #d4af37;
+            color: #f3c948;
+        }
+
+        /* Dice 3D-ish rotation */
+        @keyframes diceSpin {
             0% { transform: rotate(0deg) scale(1); }
-            20% { transform: rotate(-18deg) scale(1.15); }
-            40% { transform: rotate(18deg) scale(1.15); }
-            60% { transform: rotate(-12deg) scale(1.1); }
-            80% { transform: rotate(12deg) scale(1.05); }
-            100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-120deg) scale(1.2) rotateX(45deg); }
+            50% { transform: rotate(180deg) scale(1.3) rotateY(60deg); }
+            75% { transform: rotate(290deg) scale(1.1) rotateX(-30deg); }
+            100% { transform: rotate(360deg) scale(1); }
         }
-        .animate-dice-roll {
-            animation: rollShake 0.5s ease-in-out;
-        }
-
-        /* Selection Glow */
-        .card-selected {
-            border-color: #d4af37 !important;
-            background-color: #242232 !important;
-            box-shadow: 0 0 18px rgba(212, 175, 55, 0.35) !important;
+        .animate-dice {
+            animation: diceSpin 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Pulsing status LED */
-        .online-pulse {
-            box-shadow: 0 0 8px #22c55e;
+        /* Pulse animations */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
-        .offline-pulse {
-            box-shadow: 0 0 8px #ef4444;
+        .pulse-beacon {
+            animation: pulseGlow 2s infinite ease-in-out;
         }
     </style>
 </head>
 <body class="bg-darkBg text-textLight font-spectral min-h-screen flex flex-col antialiased selection:bg-goldAccent selection:text-black">
 
-    <!-- Top Header -->
-    <header class="bg-panelBg border-b border-goldAccent/30 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-xl">
+    <!-- TOP HEADER -->
+    <header class="bg-panelBg border-b border-goldAccent/30 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-2xl">
         <div class="flex items-center gap-3">
-            <span class="text-2xl">🐉</span>
-            <h1 class="font-cinzel text-xl sm:text-2xl font-bold text-goldAccent tracking-wider">
-                MESTRE DAS SOMBRAS
-            </h1>
-            <span class="hidden sm:inline-block text-xs font-mono bg-black/40 text-goldAccent/80 px-2 py-0.5 rounded border border-goldAccent/20">
-                RPG Solo Solo
-            </span>
+            <span class="text-3xl filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]">🔮</span>
+            <div>
+                <h1 class="font-cinzel text-lg sm:text-xl font-black text-goldAccent tracking-widest leading-none">
+                    CHRONICLES OF THE SANDBOX
+                </h1>
+                <p class="text-[10px] font-mono text-textMuted tracking-wide">Mundo Aberto Solo & Master IA</p>
+            </div>
         </div>
 
-        <!-- Connection Status & API Config -->
-        <div class="flex items-center gap-3">
-            <div id="status-badge" class="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full border border-gray-700 text-xs font-mono">
+        <!-- Connection Status & Header Controls -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div id="status-badge" class="flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full border border-gray-800 text-xs font-mono">
                 <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
-                <span id="status-text" class="text-gray-400">Verificando API...</span>
+                <span id="status-text" class="text-gray-400 hidden sm:inline">Verificando API...</span>
             </div>
-            <button onclick="toggleApiModal()" class="p-2 text-textMuted hover:text-goldAccent bg-black/40 hover:bg-black/80 border border-goldAccent/20 rounded-md transition" title="Configurar URL do Backend">
+
+            <button onclick="salvarJogoManual()" title="Salvar no Navegador" class="px-2.5 py-1.5 bg-black/50 hover:bg-goldAccent/20 border border-goldAccent/30 rounded text-xs font-cinzel text-goldAccent transition">
+                💾 <span class="hidden md:inline">Salvar</span>
+            </button>
+            <button onclick="exportarSaveJSON()" title="Exportar Arquivo JSON" class="px-2.5 py-1.5 bg-black/50 hover:bg-goldAccent/20 border border-goldAccent/30 rounded text-xs font-cinzel text-goldAccent transition">
+                📥 <span class="hidden md:inline">Exportar</span>
+            </button>
+            <label title="Importar Arquivo JSON" class="px-2.5 py-1.5 bg-black/50 hover:bg-goldAccent/20 border border-goldAccent/30 rounded text-xs font-cinzel text-goldAccent transition cursor-pointer">
+                📤 <span class="hidden md:inline">Importar</span>
+                <input type="file" id="input-import-json" accept=".json" class="hidden" onchange="importarSaveJSON(event)">
+            </label>
+            <button onclick="toggleConfigModal()" title="Configurações da IA" class="p-1.5 bg-black/50 hover:bg-goldAccent/20 border border-goldAccent/30 rounded text-goldAccent transition">
                 ⚙️
+            </button>
+            <button onclick="confirmarNovoJogo()" title="Novo Jogo" class="p-1.5 bg-crimsonAccent/30 hover:bg-crimsonAccent/60 border border-crimsonAccent rounded text-crimsonBright transition">
+                🔄
             </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-1 flex flex-col max-w-7xl w-full mx-auto p-3 sm:p-5 gap-6">
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 flex flex-col max-w-[1600px] w-full mx-auto p-2 sm:p-4 gap-4">
 
-        <!-- SCREEN 1: CHARACTER CREATION -->
-        <section id="screen-creation" class="flex flex-col gap-8 max-w-4xl mx-auto w-full">
-            <div class="text-center space-y-2 my-2">
-                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-goldAccent tracking-wide">
-                    Crie Seu Aventureiro
+        <!-- =================================================================== -->
+        <!-- SCREEN 1: CHARACTER CREATION (TELA DE CRIAÇÃO DE PERSONAGEM)        -->
+        <!-- =================================================================== -->
+        <section id="screen-creation" class="flex flex-col gap-6 max-w-4xl mx-auto w-full my-auto py-6">
+            <div class="text-center space-y-2">
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-black text-goldAccent tracking-widest drop-shadow">
+                    MOLDE SEU DESTINO
                 </h2>
-                <p class="text-textMuted text-sm sm:text-base max-w-xl mx-auto">
-                    Moldado pelas trevas e destinado à glória. Escolha suas origens antes de adentrar os reinos do Mestre.
+                <p class="text-textMuted text-sm max-w-lg mx-auto">
+                    Neste mundo aberto, não há caminhos pré-determinados. Crie seu herói com total liberdade e adentre as terras desconhecidas.
                 </p>
             </div>
 
-            <!-- Character Name Input -->
-            <div class="bg-panelBg p-5 rounded-lg border border-goldAccent/30 shadow-lg space-y-2">
-                <label for="char-name" class="block font-cinzel text-goldAccent text-sm font-semibold tracking-wider">
-                    NOME DO PERSONAGEM
-                </label>
-                <input type="text" id="char-name" placeholder="Ex: Aethelgard o Destemido" 
-                    class="w-full bg-black/60 border border-goldAccent/40 rounded px-4 py-2.5 text-textLight font-spectral focus:outline-none focus:border-goldHover focus:ring-1 focus:ring-goldHover text-lg transition">
-            </div>
+            <div class="bg-panelBg rounded-xl p-5 sm:p-7 border border-goldAccent/30 shadow-2xl space-y-6">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Name Input -->
+                    <div class="space-y-1.5 md:col-span-1">
+                        <label class="block font-cinzel text-xs font-bold text-goldAccent uppercase">Nome do Personagem</label>
+                        <input type="text" id="create-name" placeholder="Ex: Valerius das Sombras" 
+                            class="w-full bg-black/60 border border-goldAccent/30 rounded-lg px-3.5 py-2 text-textLight focus:outline-none focus:border-goldHover focus:ring-1 focus:ring-goldHover text-sm">
+                    </div>
 
-            <!-- Race Selection -->
-            <div class="space-y-3">
-                <h3 class="font-cinzel text-lg text-goldAccent tracking-wide flex items-center gap-2">
-                    <span>🛡️</span> ESCOLHA A RAÇA
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="race-grid">
-                    <!-- Races populated via JS or static HTML cards -->
+                    <!-- Race Input + Quick Suggestions -->
+                    <div class="space-y-1.5 md:col-span-1">
+                        <label class="block font-cinzel text-xs font-bold text-goldAccent uppercase">Raça</label>
+                        <input type="text" id="create-race" placeholder="Ex: Elfo Sombrio" 
+                            class="w-full bg-black/60 border border-goldAccent/30 rounded-lg px-3.5 py-2 text-textLight focus:outline-none focus:border-goldHover text-sm">
+                        <div class="flex flex-wrap gap-1 pt-1" id="race-tags">
+                            <!-- Tags populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Class Input + Quick Suggestions -->
+                    <div class="space-y-1.5 md:col-span-1">
+                        <label class="block font-cinzel text-xs font-bold text-goldAccent uppercase">Classe</label>
+                        <input type="text" id="create-class" placeholder="Ex: Lâmina Arcana" 
+                            class="w-full bg-black/60 border border-goldAccent/30 rounded-lg px-3.5 py-2 text-textLight focus:outline-none focus:border-goldHover text-sm">
+                        <div class="flex flex-wrap gap-1 pt-1" id="class-tags">
+                            <!-- Tags populated by JS -->
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Class Selection -->
-            <div class="space-y-3">
-                <h3 class="font-cinzel text-lg text-goldAccent tracking-wide flex items-center gap-2">
-                    <span>⚔️</span> ESCOLHA A CLASSE
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="class-grid">
-                    <!-- Classes populated via JS or static HTML cards -->
+                <!-- Attributes Grid (Free Edit / Sliders) -->
+                <div class="space-y-2 border-t border-goldAccent/20 pt-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-cinzel text-xs font-bold text-goldAccent uppercase tracking-wider">Atributos Básicos</h3>
+                        <span class="text-[11px] font-mono text-textMuted">Ajuste os valores do seu herói</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="attributes-container">
+                        <!-- Dynamic Attribute Cards -->
+                    </div>
                 </div>
-            </div>
 
-            <!-- Start Button -->
-            <div class="pt-4 text-center">
-                <button id="btn-start-game" onclick="iniciarAventura()" 
-                    class="font-cinzel text-lg font-bold text-black bg-gradient-to-r from-goldAccent via-amber-300 to-goldAccent hover:from-goldHover hover:to-amber-200 px-10 py-3.5 rounded-lg shadow-lg hover:shadow-goldAccent/20 transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                    📜 INICIAR AVENTURA
-                </button>
+                <!-- History / Background / Special Traits -->
+                <div class="space-y-1.5 border-t border-goldAccent/20 pt-4">
+                    <label class="block font-cinzel text-xs font-bold text-goldAccent uppercase">Histórico, Antecedentes & Habilidades Especiais</label>
+                    <textarea id="create-history" rows="3" placeholder="Descreva de onde vem seu personagem, suas motivações, segredos ou juramentos..." 
+                        class="w-full bg-black/60 border border-goldAccent/30 rounded-lg p-3 text-textLight text-sm focus:outline-none focus:border-goldHover resize-none"></textarea>
+                </div>
+
+                <!-- Initial Inventory List -->
+                <div class="space-y-2 border-t border-goldAccent/20 pt-4">
+                    <div class="flex justify-between items-center">
+                        <label class="font-cinzel text-xs font-bold text-goldAccent uppercase">Inventário Inicial</label>
+                        <button onclick="adicionarItemCriacao()" class="text-xs text-goldHover hover:underline font-bold">+ Adicionar Item</button>
+                    </div>
+                    <div id="create-inventory-tags" class="flex flex-wrap gap-2 min-h-[36px] bg-black/40 p-2 rounded-lg border border-goldAccent/10">
+                        <!-- Inventory Badges -->
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2 text-center">
+                    <button onclick="iniciarAventura()" id="btn-start-adventure"
+                        class="font-cinzel text-base font-extrabold text-black bg-gradient-to-r from-goldAccent via-amber-300 to-goldAccent hover:from-goldHover hover:to-amber-200 px-10 py-3.5 rounded-lg shadow-xl hover:shadow-goldAccent/20 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                        ⚔️ INICIAR AVENTURA SANDBOX
+                    </button>
+                </div>
             </div>
         </section>
 
-        <!-- SCREEN 2: GAMEPLAY AREA -->
-        <section id="screen-game" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100vh-100px)] min-h-[600px]">
+
+        <!-- =================================================================== -->
+        <!-- SCREEN 2: GAMEPLAY DASHBOARD (GRID RESPONSIVO DE JOGO)              -->
+        <!-- =================================================================== -->
+        <section id="screen-game" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-80px)] min-h-[680px]">
             
-            <!-- SIDEBAR: Character Sheet & Tools (Cols 4) -->
-            <aside class="lg:col-span-4 bg-panelBg rounded-xl border border-goldAccent/30 flex flex-col p-4 gap-4 overflow-y-auto">
+            <!-- PAINEL LATERAL ESQUERDO: MAPA 2D & LOCALIZAÇÃO (Cols 3) -->
+            <aside class="lg:col-span-3 bg-panelBg rounded-xl border border-goldAccent/30 flex flex-col p-3 gap-3 overflow-hidden shadow-xl">
                 
-                <!-- Character Info Box -->
-                <div class="bg-black/50 p-4 rounded-lg border border-goldAccent/20 space-y-3">
-                    <div class="flex items-center justify-between border-b border-goldAccent/20 pb-2">
-                        <div>
-                            <h2 id="sheet-name" class="font-cinzel text-xl font-bold text-goldAccent">---</h2>
-                            <p id="sheet-race-class" class="text-xs text-textMuted uppercase font-mono tracking-wider">---</p>
-                        </div>
-                        <span id="sheet-avatar" class="text-3xl">🧙‍♂️</span>
-                    </div>
-
-                    <!-- Health Bar (HP) -->
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-mono">
-                            <span class="text-crimsonBright font-bold">VIDA (HP)</span>
-                            <span id="hp-text" class="text-textLight">10 / 10</span>
-                        </div>
-                        <div class="w-full bg-black/80 h-3.5 rounded-full overflow-hidden border border-crimsonAccent/50 flex items-center p-0.5">
-                            <div id="hp-bar-fill" class="bg-gradient-to-r from-crimsonAccent to-red-600 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
-                        </div>
-                        <div class="flex gap-2 justify-end pt-1">
-                            <button onclick="alterarHP(-1)" class="px-2 py-0.5 bg-crimsonAccent/40 hover:bg-crimsonAccent text-white text-xs font-bold rounded border border-crimsonAccent transition">-1 HP</button>
-                            <button onclick="alterarHP(1)" class="px-2 py-0.5 bg-green-900/40 hover:bg-green-800 text-white text-xs font-bold rounded border border-green-600 transition">+1 HP</button>
-                        </div>
-                    </div>
-
-                    <!-- Attributes / Trait Summary -->
-                    <div class="text-xs bg-black/40 p-2.5 rounded border border-white/5 space-y-1">
-                        <span class="text-goldAccent font-cinzel font-semibold block">Habilidades & Bônus:</span>
-                        <p id="sheet-traits" class="text-textMuted leading-relaxed">---</p>
-                    </div>
-                </div>
-
-                <!-- Interactive Inventory -->
-                <div class="bg-black/50 p-4 rounded-lg border border-goldAccent/20 flex-1 flex flex-col gap-2">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-cinzel text-sm text-goldAccent font-bold tracking-wider flex items-center gap-1.5">
-                            <span>🎒</span> INVENTÁRIO
-                        </h3>
-                        <button onclick="adicionarItemInventario()" class="text-xs text-goldAccent hover:underline">+ Item</button>
-                    </div>
-                    <ul id="inventory-list" class="space-y-1.5 overflow-y-auto max-h-36 pr-1 text-xs">
-                        <!-- Items populated dynamically -->
-                    </ul>
-                </div>
-
-                <!-- Interactive Dice Roller Tray -->
-                <div class="bg-black/50 p-4 rounded-lg border border-goldAccent/20 space-y-3">
-                    <h3 class="font-cinzel text-sm text-goldAccent font-bold tracking-wider flex items-center justify-between">
-                        <span>🎲 DADOS VIRTUAIS</span>
-                        <span id="dice-last-result" class="text-xs font-mono text-amber-300"></span>
+                <!-- Map Header -->
+                <div class="flex justify-between items-center border-b border-goldAccent/20 pb-1.5">
+                    <h3 class="font-cinzel text-xs font-bold text-goldAccent tracking-wider flex items-center gap-1.5">
+                        <span>🗺️</span> MAPA DO MUNDO
                     </h3>
-                    <div class="grid grid-cols-6 gap-1.5">
-                        <button onclick="rolarDado(4)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded font-mono text-xs text-goldAccent font-bold transition">d4</button>
-                        <button onclick="rolarDado(6)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded font-mono text-xs text-goldAccent font-bold transition">d6</button>
-                        <button onclick="rolarDado(8)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded font-mono text-xs text-goldAccent font-bold transition">d8</button>
-                        <button onclick="rolarDado(10)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded font-mono text-xs text-goldAccent font-bold transition">d10</button>
-                        <button onclick="rolarDado(12)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded font-mono text-xs text-goldAccent font-bold transition">d12</button>
-                        <button onclick="rolarDado(20)" class="p-2 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/40 rounded font-mono text-xs text-goldHover font-black bg-goldAccent/10 transition">d20</button>
+                    <div class="flex gap-1">
+                        <button onclick="mapZoom(1.2)" class="px-1.5 py-0.5 bg-black/60 hover:bg-goldAccent/20 rounded text-[10px] text-goldAccent border border-goldAccent/20 font-mono" title="Aumentar Zoom">+</button>
+                        <button onclick="mapZoom(0.8)" class="px-1.5 py-0.5 bg-black/60 hover:bg-goldAccent/20 rounded text-[10px] text-goldAccent border border-goldAccent/20 font-mono" title="Diminuir Zoom">-</button>
+                        <button onclick="mapRecenter()" class="px-1.5 py-0.5 bg-black/60 hover:bg-goldAccent/20 rounded text-[10px] text-goldAccent border border-goldAccent/20 font-mono" title="Centralizar No Jogador">🎯</button>
                     </div>
                 </div>
 
-                <!-- Save / Load Session Tools -->
-                <div class="bg-black/50 p-3 rounded-lg border border-goldAccent/20 space-y-2 text-xs">
-                    <span class="font-cinzel text-textMuted font-semibold block text-center">GERENCIAR SESSÃO</span>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="salvarJogoManual()" class="p-2 bg-cardBg hover:bg-black border border-goldAccent/30 rounded text-goldAccent font-semibold transition text-center">
-                            💾 Salvar (Local)
-                        </button>
-                        <button onclick="exportarSaveJSON()" class="p-2 bg-cardBg hover:bg-black border border-goldAccent/30 rounded text-goldAccent font-semibold transition text-center">
-                            📥 Exportar JSON
-                        </button>
-                        <button onclick="carregarJogoManual()" class="p-2 bg-cardBg hover:bg-black border border-white/20 rounded text-textLight transition text-center">
-                            📂 Carregar (Local)
-                        </button>
-                        <label class="p-2 bg-cardBg hover:bg-black border border-white/20 rounded text-textLight transition text-center cursor-pointer block">
-                            📤 Importar JSON
-                            <input type="file" id="import-json-file" accept=".json" class="hidden" onchange="importarSaveJSON(event)">
-                        </label>
+                <!-- Interactive 2D Canvas Map -->
+                <div class="relative flex-1 bg-black rounded-lg border border-goldAccent/20 overflow-hidden min-h-[220px] max-h-[360px] lg:max-h-none flex items-center justify-center">
+                    <canvas id="game-map-canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+                    <div class="absolute bottom-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 rounded border border-goldAccent/30 text-[10px] font-mono text-goldAccent">
+                        Posição: <span id="map-coord-display">(0, 0)</span>
+                    </div>
+                </div>
+
+                <!-- Current Location & Weather Card -->
+                <div class="bg-black/50 p-3 rounded-lg border border-goldAccent/20 space-y-1.5">
+                    <span class="text-[10px] font-mono text-textMuted uppercase block">Região Atual</span>
+                    <h4 id="loc-name-display" class="font-cinzel text-sm font-bold text-goldHover truncate">Desconhecido</h4>
+                    <div class="flex items-center gap-2 text-xs text-textMuted pt-1 border-t border-white/5">
+                        <span id="loc-weather-icon">🌧️</span>
+                        <span id="loc-weather-text" class="truncate">Névoa densa e vento frio.</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- CHAT AREA: Narration & Input (Cols 8) -->
-            <div class="lg:col-span-8 bg-panelBg rounded-xl border border-goldAccent/30 flex flex-col overflow-hidden shadow-2xl">
+
+            <!-- PAINEL CENTRAL: CHAT E NARRATIVA (Cols 6) -->
+            <main class="lg:col-span-6 bg-panelBg rounded-xl border border-goldAccent/30 flex flex-col overflow-hidden shadow-2xl">
                 
-                <!-- Chat Log Header -->
-                <div class="bg-black/60 p-3 border-b border-goldAccent/20 flex justify-between items-center text-xs font-cinzel">
-                    <span class="text-goldAccent font-bold tracking-wider">CRÔNICA DA AVENTURA</span>
-                    <button onclick="reiniciarJogoConfirmacao()" class="text-crimsonBright hover:underline">Abandonar e Recomeçar</button>
+                <!-- Chat Top Status Header -->
+                <div class="bg-black/70 px-4 py-2 border-b border-goldAccent/20 flex justify-between items-center text-xs font-cinzel">
+                    <span id="chat-header-title" class="text-goldAccent font-bold">CRÔNICAS DE VALÓRIA</span>
+                    <span id="chat-turn-counter" class="text-textMuted font-mono text-[11px]">Turno 1</span>
                 </div>
 
                 <!-- Scrollable Messages Window -->
@@ -279,132 +274,308 @@
                     <!-- Messages rendered dynamically -->
                 </div>
 
-                <!-- Loading Spinner / Thinking Bar -->
-                <div id="loading-indicator" class="hidden px-4 py-3 bg-black/40 border-t border-goldAccent/10 flex items-center gap-3">
+                <!-- Dice Check Alert Banner (Shown when IA requests roll) -->
+                <div id="dice-required-banner" class="hidden px-4 py-2 bg-crimsonAccent/20 border-t border-crimsonBright flex items-center justify-between text-xs text-amber-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg animate-bounce">🎲</span>
+                        <span><strong>Teste de Risco Solicitado:</strong> O Mestre exige uma rolagem de dados para esta ação!</span>
+                    </div>
+                    <button onclick="rolard20()" class="px-2.5 py-1 bg-goldAccent hover:bg-goldHover text-black font-bold rounded text-xs transition">
+                        Rolar d20 Agora
+                    </button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="hidden px-4 py-2.5 bg-black/60 border-t border-goldAccent/10 flex items-center gap-3">
                     <div class="w-4 h-4 border-2 border-goldAccent border-t-transparent rounded-full animate-spin"></div>
                     <span class="text-xs font-medieval text-goldAccent animate-pulse">O Mestre está tecendo os fios do seu destino...</span>
                 </div>
 
-                <!-- Input Box -->
-                <div class="p-3 bg-black/60 border-t border-goldAccent/20 flex gap-2 items-end">
-                    <textarea id="action-input" rows="2" placeholder="O que você faz? (Ex: 'Procuro por armadilhas na porta', 'Saco minha espada e ataco o orc')" 
-                        class="flex-1 bg-black/80 border border-goldAccent/30 rounded-lg p-3 text-textLight text-sm font-spectral resize-none focus:outline-none focus:border-goldAccent focus:ring-1 focus:ring-goldAccent transition"
+                <!-- Action Input Bar -->
+                <div class="p-3 bg-black/80 border-t border-goldAccent/20 flex flex-col gap-2">
+                    <textarea id="action-input" rows="2" placeholder="O que você deseja fazer? (Ex: 'Exploro a caverna iluminando com a tocha', 'Tento convencer o guarda a me deixar passar')" 
+                        class="w-full bg-black/90 border border-goldAccent/30 rounded-lg p-3 text-textLight text-sm font-spectral resize-none focus:outline-none focus:border-goldAccent focus:ring-1 focus:ring-goldAccent transition"
                         onkeydown="tratarTeclaEnter(event)"></textarea>
-                    <button id="btn-send-action" onclick="enviarAcao()" 
-                        class="h-full px-5 py-3 bg-gradient-to-b from-goldAccent to-amber-600 hover:from-goldHover hover:to-amber-500 text-black font-cinzel font-bold text-sm rounded-lg transition shadow-md flex items-center justify-center">
-                        Enviar
+                    
+                    <div class="flex justify-between items-center gap-2">
+                        <button onclick="rolard20()" class="px-3 py-1.5 bg-black/60 hover:bg-goldAccent/20 border border-goldAccent/30 rounded text-xs font-mono text-goldAccent flex items-center gap-1.5 transition">
+                            <span>🎲</span> Rolar d20
+                        </button>
+                        <button id="btn-send-action" onclick="enviarAcao()" 
+                            class="px-6 py-2 bg-gradient-to-r from-goldAccent to-amber-600 hover:from-goldHover hover:to-amber-500 text-black font-cinzel font-extrabold text-xs rounded-lg transition shadow-md">
+                            Enviar Ação
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+
+            <!-- PAINEL LATERAL DIREITO: QUEST LOG & FICHA DO PERSONAGEM (Cols 3) -->
+            <aside class="lg:col-span-3 bg-panelBg rounded-xl border border-goldAccent/30 flex flex-col p-3 gap-3 overflow-hidden shadow-xl">
+                
+                <!-- Tab Controls -->
+                <div class="grid grid-cols-2 bg-black/60 p-1 rounded-lg border border-goldAccent/20 text-xs font-cinzel font-bold">
+                    <button id="tab-btn-quests" onclick="switchTab('quests')" class="py-1.5 rounded text-goldAccent bg-goldAccent/20">
+                        📜 Missões
+                    </button>
+                    <button id="tab-btn-sheet" onclick="switchTab('sheet')" class="py-1.5 rounded text-textMuted hover:text-textLight">
+                        👤 Ficha
                     </button>
                 </div>
-            </div>
+
+                <!-- TAB 1: QUEST LOG -->
+                <div id="tab-content-quests" class="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+                    <div class="space-y-2">
+                        <span class="text-[10px] font-mono text-goldAccent uppercase block font-bold">Missões Ativas</span>
+                        <div id="active-quests-list" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-goldAccent/10">
+                        <span class="text-[10px] font-mono text-textMuted uppercase block font-bold">Concluídas / Falhas</span>
+                        <div id="completed-quests-list" class="space-y-1.5">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: CHARACTER SHEET -->
+                <div id="tab-content-sheet" class="hidden flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+                    <div class="bg-black/50 p-3 rounded-lg border border-goldAccent/20 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 id="sheet-name" class="font-cinzel text-sm font-bold text-goldAccent">---</h4>
+                                <span id="sheet-race-class" class="text-[11px] font-mono text-textMuted">---</span>
+                            </div>
+                        </div>
+                        <p id="sheet-history" class="text-xs text-textMuted leading-relaxed max-h-24 overflow-y-auto">---</p>
+                    </div>
+
+                    <!-- Attributes list -->
+                    <div class="grid grid-cols-2 gap-1.5 text-xs font-mono" id="sheet-attributes-grid">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- Dynamic Inventory -->
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-goldAccent/20 flex-1 flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-cinzel text-xs font-bold text-goldAccent">🎒 Inventário</span>
+                            <button onclick="adicionarItemJogo()" class="text-[10px] text-goldHover hover:underline">+ Adicionar</button>
+                        </div>
+                        <ul id="sheet-inventory-list" class="space-y-1 overflow-y-auto max-h-36 pr-1 text-xs">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- d20 Virtual Roller Component -->
+                <div class="bg-black/60 p-3 rounded-lg border border-goldAccent/30 flex flex-col items-center gap-2">
+                    <div class="flex justify-between w-full items-center text-xs font-cinzel">
+                        <span class="text-goldAccent font-bold">DADO D20 VIRTUAL</span>
+                        <span id="dice-result-badge" class="font-mono text-amber-300 font-bold">--</span>
+                    </div>
+
+                    <div id="dice-visual" onclick="rolard20()" class="w-14 h-14 cursor-pointer flex items-center justify-center bg-gradient-to-br from-goldAccent to-amber-700 rounded-xl border-2 border-goldHover shadow-lg hover:scale-105 transition transform">
+                        <span id="dice-number" class="font-cinzel font-black text-2xl text-black">20</span>
+                    </div>
+
+                    <button onclick="usarResultadoNoChat()" class="text-[11px] text-goldAccent hover:underline font-mono">
+                        ✍️ Usar Resultado na Ação
+                    </button>
+                </div>
+            </aside>
 
         </section>
     </main>
 
-    <!-- Modal: API Configuration -->
-    <div id="modal-api" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-panelBg border border-goldAccent/40 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <h3 class="font-cinzel text-lg font-bold text-goldAccent">Configurar Backend FastAPI</h3>
-            <p class="text-xs text-textMuted">
-                Se você estiver rodando o servidor Python em outra máquina ou porta, altere a URL abaixo.
-            </p>
-            <div class="space-y-1">
-                <label for="input-api-url" class="text-xs font-mono text-goldAccent">URL da API:</label>
-                <input type="text" id="input-api-url" class="w-full bg-black border border-goldAccent/30 rounded p-2 text-sm font-mono text-textLight focus:outline-none focus:border-goldAccent">
+
+    <!-- MODAL 1: AI CONFIGURATION -->
+    <div id="modal-config" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-panelBg border border-goldAccent/40 rounded-xl p-5 sm:p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-goldAccent/20 pb-2">
+                <h3 class="font-cinzel text-base font-bold text-goldAccent flex items-center gap-2">
+                    <span>⚙️</span> Configurações da IA (FastAPI / Ollama)
+                </h3>
+                <button onclick="toggleConfigModal()" class="text-textMuted hover:text-white font-bold">✕</button>
             </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="toggleApiModal()" class="px-4 py-2 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700">Cancelar</button>
-                <button onclick="salvarConfiguracaoAPI()" class="px-4 py-2 text-xs bg-goldAccent text-black font-bold rounded hover:bg-goldHover">Salvar & Testar</button>
+
+            <div class="space-y-3 text-xs">
+                <!-- API URL -->
+                <div class="space-y-1">
+                    <label class="font-mono text-goldAccent">API URL (Backend FastAPI):</label>
+                    <input type="text" id="cfg-api-url" class="w-full bg-black/80 border border-goldAccent/30 rounded p-2 text-textLight font-mono">
+                </div>
+
+                <!-- Model Selection -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="font-mono text-goldAccent">Modelo Ollama:</label>
+                        <input type="text" id="cfg-model-name" placeholder="llama3.2" class="w-full bg-black/80 border border-goldAccent/30 rounded p-2 text-textLight font-mono">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="font-mono text-goldAccent">Temperatura (<span id="cfg-temp-val">0.8</span>):</label>
+                        <input type="range" id="cfg-temp" min="0" max="2" step="0.1" value="0.8" 
+                            oninput="document.getElementById('cfg-temp-val').textContent = this.value"
+                            class="w-full accent-goldAccent">
+                    </div>
+                </div>
+
+                <!-- System Prompt Editor -->
+                <div class="space-y-1">
+                    <label class="font-mono text-goldAccent">System Prompt do Mestre:</label>
+                    <textarea id="cfg-system-prompt" rows="5" class="w-full bg-black/80 border border-goldAccent/30 rounded p-2 text-textLight font-mono text-[11px] leading-relaxed resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-between gap-2 pt-2 border-t border-goldAccent/20">
+                <button onclick="testarConexaoConfig()" class="px-3 py-1.5 text-xs bg-black/60 border border-goldAccent/30 text-goldAccent rounded hover:bg-goldAccent/20">
+                    🔍 Testar API (/config)
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="toggleConfigModal()" class="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700">Cancelar</button>
+                    <button onclick="salvarConfiguracaoIA()" class="px-4 py-1.5 text-xs bg-goldAccent text-black font-bold rounded hover:bg-goldHover">Salvar Config</button>
+                </div>
             </div>
         </div>
     </div>
 
+
+    <!-- MODAL 2: OFFLINE / BACKEND WARNING -->
+    <div id="modal-offline" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-panelBg border border-crimsonAccent rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center">
+            <span class="text-4xl block">⚠️</span>
+            <h3 class="font-cinzel text-lg font-bold text-crimsonBright">Servidor FastAPI Desconectado</h3>
+            <p class="text-xs text-textMuted leading-relaxed">
+                Não foi possível conectar ao backend local em <code id="offline-url-display" class="text-amber-300">http://127.0.0.1:8000</code>.
+            </p>
+            
+            <div class="bg-black/60 p-3 rounded text-left text-[11px] font-mono text-gray-300 space-y-1 border border-white/10">
+                <p class="text-goldAccent font-bold">Como iniciar o servidor:</p>
+                <p>1. Instale as dependências: <span class="text-green-400">pip install fastapi uvicorn ollama pydantic</span></p>
+                <p>2. Execute no terminal: <span class="text-green-400">python main.py</span></p>
+            </div>
+
+            <div class="flex flex-col gap-2 pt-2">
+                <button onclick="tentarReconectarAPI()" class="w-full py-2 bg-goldAccent text-black font-bold text-xs rounded hover:bg-goldHover">
+                    🔄 Tentar Reconectar
+                </button>
+                <button onclick="ativarModoSimulacao()" class="w-full py-2 bg-gray-800 text-gray-300 font-bold text-xs rounded hover:bg-gray-700">
+                    🎲 Jogar em Modo Offline / Simulação
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
-        // Global Game State
-        let API_URL = localStorage.getItem('mestre_api_url') || 'http://127.0.0.1:8000';
-        
-        const RACES = [
-            { id: 'humano', nome: 'Humano', desc: '+1 em Atributos, Adaptação rápida.', bonus: 'Versátil e Ambicioso' },
-            { id: 'elfo', nome: 'Elfo', desc: '+2 Destreza, Visão no Escuro.', bonus: 'Herança Arcana' },
-            { id: 'anao', nome: 'Anão', desc: '+2 Constituição, Vigor Robusto.', bonus: 'Conhecimento de Pedra' },
-            { id: 'orc', nome: 'Orc', desc: '+2 Força, Ferocidade Brutal.', bonus: 'Visão Noturna' },
-            { id: 'halfling', nome: 'Halfling', desc: '+2 Agilidade, Pequena Estatura.', bonus: 'Sorte dos Pequenos' },
-            { id: 'tiefling', nome: 'Tiefling', desc: '+2 Carisma, Sangue Infernal.', bonus: 'Resistência ao Fogo' }
-        ];
+        // Default Configuration
+        let API_URL = localStorage.getItem('rpg_sandbox_api_url') || 'http://127.0.0.1:8000';
 
-        const CLASSES = [
-            { id: 'guerreiro', nome: 'Guerreiro', hp: 12, equip: ['Espada Longa', 'Escudo de Aço', 'Cota de Malha'], hab: 'Ataque Poderoso, Postura Defensiva' },
-            { id: 'mago', nome: 'Mago', hp: 6, equip: ['Cajado de Madeira', 'Grimório', 'Poção de Mana'], hab: 'Seta Mágica, Escudo Arcano' },
-            { id: 'ladino', nome: 'Ladino', hp: 8, equip: ['Adagas Duplas', 'Gazuas (Ganchos)', 'Capuz Escuro'], hab: 'Ataque Furtivo, Esquiva Rápida' },
-            { id: 'clerigo', nome: 'Clérigo', hp: 10, equip: ['Maca de Aço', 'Símbolo Sagrado', 'Poção de Cura'], hab: 'Cura Divina, Expulsar Mortos-Vivos' },
-            { id: 'barbaro', nome: 'Bárbaro', hp: 14, equip: ['Machado Duplo', 'Peles de Lobo'], hab: 'Fúria Berserker, Pele de Ferro' },
-            { id: 'bardo', nome: 'Bardo', hp: 8, equip: ['Alaúde', 'Adaga Elegante', 'Kit de Disfarce'], hab: 'Inspiração de Bardo, Canto Encantador' }
-        ];
+        const RACE_SUGGESTIONS = ['Humano', 'Elfo', 'Anão', 'Orc', 'Halfling', 'Tiefling', 'Draconato', 'Morto-Vivo'];
+        const CLASS_SUGGESTIONS = ['Guerreiro', 'Mago', 'Ladino', 'Clérigo', 'Bárbaro', 'Bardo', 'Paladino', 'Bruxo'];
 
-        let selectedRace = 'humano';
-        let selectedClass = 'guerreiro';
+        const DEFAULT_ATTRIBUTES = {
+            'FOR': 10, 'DES': 10, 'CON': 10,
+            'INT': 10, 'SAB': 10, 'CAR': 10
+        };
 
+        const DEFAULT_SYSTEM_PROMPT = `Você é um Mestre de RPG de Mesa (Game Master) responsável por conduzir um RPG Solo Sandbox de Mundo Aberto.
+
+REGRAS DE CONDUÇÃO E LIBERDADE TOTAL:
+1. LIBERDADE TOTAL AO JOGADOR: NUNCA forneça opções de múltipla escolha (ex: "O que você faz? A, B ou C"). Narre a reação do mundo de forma viva e imersiva e DEIXE O FINAL ABERTO para a ação livre do jogador.
+2. ADAPTAÇÃO E REAÇÃO: O mundo reage organicamente à raça, classe, atributos e escolhas prévias do personagem.
+3. TESTES DE DADOS: Defina "requires_dice_check": true SEMPRE que a ação envolver risco, combate ou incerteza.
+4. MUNDO ABERTO E NAVEGAÇÃO: Atualize as coordenadas (x,y) e o nome do local conforme o jogador se movimenta pelo mapa.
+
+FORMATO OBRIGATÓRIO DE RESPOSTA (JSON APENAS):
+{
+    "narrative": "Texto da narração imersiva (máximo 2-3 parágrafos).",
+    "current_location": "Nome da Cidade, Região ou Local atual",
+    "map_coordinates": {"x": 0, "y": 0},
+    "quest_update": [{"id": "q01", "titulo": "Nome da Quest", "descricao": "Detalhes", "status": "ativa"}],
+    "requires_dice_check": false
+}`;
+
+        // Global State
         let gameState = {
             character: {
                 nome: '',
                 raca: '',
                 classe: '',
-                historico_atributos: '',
-                hpCurrent: 10,
-                hpMax: 10,
-                inventory: []
+                atributos: { ...DEFAULT_ATTRIBUTES },
+                historico: '',
+                inventario: []
             },
-            chatHistory: [], // Lista de { role: 'user' | 'assistant', content: string }
-            isWaitingApi: false
+            location: {
+                nome: 'Vila Inicial de Valória',
+                coords: { x: 0, y: 0 },
+                clima: 'Céu limpo com brisa suave de montanha.'
+            },
+            quests: [], // List of {id, titulo, descricao, status: 'ativa'|'concluida'|'falhou'}
+            chatHistory: [], // List of {role: 'user'|'assistant', content: string}
+            turnCounter: 1,
+            isWaitingApi: false,
+            isOfflineSimulation: false,
+            lastDiceRoll: null,
+            aiConfig: {
+                model_name: 'llama3.2',
+                temperature: 0.8,
+                system_prompt: DEFAULT_SYSTEM_PROMPT
+            }
         };
 
-        // Synthesize dice rolling sounds using pure Web Audio API (No external MP3 files needed)
-        function playDiceSound() {
+        // Canvas Map Variables
+        let mapZoomLevel = 1.0;
+        let mapPanOffset = { x: 0, y: 0 };
+        let isDraggingMap = false;
+        let dragStart = { x: 0, y: 0 };
+
+        function playSynthesizedSound(type) {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
                 const ctx = new AudioCtx();
-                
-                // Play a sequence of short noise clicks to simulate dice rattling
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => {
-                        const bufferSize = ctx.sampleRate * 0.04;
-                        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                        const data = buffer.getChannelData(0);
-                        for (let j = 0; j < bufferSize; j++) {
-                            data[j] = Math.random() * 2 - 1;
-                        }
 
-                        const noise = ctx.createBufferSource();
-                        noise.buffer = buffer;
+                if (type === 'dice') {
+                    for (let i = 0; i < 4; i++) {
+                        setTimeout(() => {
+                            const bufferSize = ctx.sampleRate * 0.03;
+                            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                            const data = buffer.getChannelData(0);
+                            for (let j = 0; j < bufferSize; j++) data[j] = Math.random() * 2 - 1;
 
-                        const filter = ctx.createBiquadFilter();
-                        filter.type = 'bandpass';
-                        filter.frequency.value = 800 + Math.random() * 600;
+                            const noise = ctx.createBufferSource();
+                            noise.buffer = buffer;
+                            const filter = ctx.createBiquadFilter();
+                            filter.type = 'bandpass';
+                            filter.frequency.value = 600 + Math.random() * 800;
 
-                        const gain = ctx.createGain();
-                        gain.gain.setValueAtTime(0.15 - i * 0.02, ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
+                            const gain = ctx.createGain();
+                            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
 
-                        noise.connect(filter);
-                        filter.connect(gain);
-                        gain.connect(ctx.destination);
-
-                        noise.start();
-                    }, i * 60 + Math.random() * 20);
+                            noise.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(ctx.destination);
+                            noise.start();
+                        }, i * 70);
+                    }
                 }
-            } catch (e) {
-                // Audio not allowed before user gesture or unsupported
-            }
+            } catch (e) {}
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            renderRaceCards();
-            renderClassCards();
-            document.getElementById('input-api-url').value = API_URL;
+            renderCreationTags();
+            renderAttributeControls();
+            setupMapCanvas();
+            document.getElementById('cfg-api-url').value = API_URL;
+            document.getElementById('cfg-system-prompt').value = DEFAULT_SYSTEM_PROMPT;
+
             verificarStatusAPI();
 
-            // Tentar restaurar sessão automática
-            const autoSave = localStorage.getItem('mestre_rpg_autosave');
+            // Tentar restaurar Save do LocalStorage
+            const autoSave = localStorage.getItem('chronicles_sandbox_autosave');
             if (autoSave) {
                 try {
                     const parsed = JSON.parse(autoSave);
@@ -412,54 +583,80 @@
                         gameState = parsed;
                         carregarTelaJogo();
                         renderChatLog();
+                        renderQuestsAndSheet();
+                        drawMap();
                     }
                 } catch(e) {}
             }
         });
 
-        function renderRaceCards() {
-            const container = document.getElementById('race-grid');
-            container.innerHTML = RACES.map(r => `
-                <div onclick="selectRace('${r.id}')" id="card-race-${r.id}" 
-                    class="p-3 bg-cardBg hover:bg-black/60 border border-goldAccent/20 rounded-lg cursor-pointer transition flex flex-col justify-between ${selectedRace === r.id ? 'card-selected' : ''}">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-cinzel font-bold text-goldAccent text-sm">${r.nome}</span>
-                        </div>
-                        <p class="text-xs text-textMuted">${r.desc}</p>
+        function renderCreationTags() {
+            const raceContainer = document.getElementById('race-tags');
+            raceContainer.innerHTML = RACE_SUGGESTIONS.map(r => `
+                <button type="button" onclick="setCreationRace('${r}')" class="tag-badge text-[10px] bg-black/60 border border-goldAccent/20 text-goldAccent px-2 py-0.5 rounded cursor-pointer">${r}</button>
+            `).join('');
+
+            const classContainer = document.getElementById('class-tags');
+            classContainer.innerHTML = CLASS_SUGGESTIONS.map(c => `
+                <button type="button" onclick="setCreationClass('${c}')" class="tag-badge text-[10px] bg-black/60 border border-goldAccent/20 text-goldAccent px-2 py-0.5 rounded cursor-pointer">${c}</button>
+            `).join('');
+
+            // Inventory initial items
+            if (!gameState.character.inventario.length) {
+                gameState.character.inventario = ['Mochila de Couro', 'Tocha (x3)', 'Rações de Viagem (5 dias)'];
+            }
+            renderCreationInventory();
+        }
+
+        function setCreationRace(race) {
+            document.getElementById('create-race').value = race;
+        }
+
+        function setCreationClass(cls) {
+            document.getElementById('create-class').value = cls;
+        }
+
+        function renderAttributeControls() {
+            const container = document.getElementById('attributes-container');
+            container.innerHTML = Object.keys(DEFAULT_ATTRIBUTES).map(attr => `
+                <div class="bg-black/50 p-2 rounded border border-goldAccent/20 flex flex-col items-center">
+                    <span class="text-[10px] font-mono text-goldAccent font-bold">${attr}</span>
+                    <div class="flex items-center gap-1.5 my-1">
+                        <button type="button" onclick="adjustAttr('${attr}', -1)" class="w-5 h-5 bg-black/80 border border-goldAccent/30 text-goldAccent rounded flex items-center justify-center text-xs font-bold hover:bg-goldAccent/20">-</button>
+                        <span id="attr-val-${attr}" class="text-sm font-mono font-bold text-textLight w-6 text-center">${gameState.character.atributos[attr]}</span>
+                        <button type="button" onclick="adjustAttr('${attr}', 1)" class="w-5 h-5 bg-black/80 border border-goldAccent/30 text-goldAccent rounded flex items-center justify-center text-xs font-bold hover:bg-goldAccent/20">+</button>
                     </div>
-                    <span class="text-[10px] font-mono text-amber-400/80 mt-2 block bg-black/40 px-1.5 py-0.5 rounded w-max">${r.bonus}</span>
                 </div>
             `).join('');
         }
 
-        function renderClassCards() {
-            const container = document.getElementById('class-grid');
-            container.innerHTML = CLASSES.map(c => `
-                <div onclick="selectClass('${c.id}')" id="card-class-${c.id}" 
-                    class="p-3 bg-cardBg hover:bg-black/60 border border-goldAccent/20 rounded-lg cursor-pointer transition flex flex-col justify-between ${selectedClass === c.id ? 'card-selected' : ''}">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-cinzel font-bold text-goldAccent text-sm">${c.nome}</span>
-                            <span class="text-xs font-mono text-crimsonBright font-bold">HP: ${c.hp}</span>
-                        </div>
-                        <p class="text-xs text-textMuted leading-snug mb-1">${c.hab}</p>
-                    </div>
-                    <span class="text-[10px] font-mono text-textMuted mt-1 block truncate">Equip: ${c.equip.join(', ')}</span>
-                </div>
+        function adjustAttr(attr, delta) {
+            const val = Math.max(3, Math.min(20, (gameState.character.atributos[attr] || 10) + delta));
+            gameState.character.atributos[attr] = val;
+            document.getElementById(`attr-val-${attr}`).textContent = val;
+        }
+
+        function renderCreationInventory() {
+            const container = document.getElementById('create-inventory-tags');
+            container.innerHTML = gameState.character.inventario.map((item, idx) => `
+                <span class="inline-flex items-center gap-1 bg-cardBg border border-goldAccent/30 text-textLight px-2 py-1 rounded text-xs">
+                    ${item}
+                    <button type="button" onclick="removerItemCriacao(${idx})" class="text-red-400 font-bold hover:text-red-300 ml-1">✕</button>
+                </span>
             `).join('');
         }
 
-        function selectRace(id) {
-            selectedRace = id;
-            document.querySelectorAll('#race-grid > div').forEach(el => el.classList.remove('card-selected'));
-            document.getElementById(`card-race-${id}`).classList.add('card-selected');
+        function adicionarItemCriacao() {
+            const item = prompt('Nome do novo item:');
+            if (item && item.trim()) {
+                gameState.character.inventario.push(item.trim());
+                renderCreationInventory();
+            }
         }
 
-        function selectClass(id) {
-            selectedClass = id;
-            document.querySelectorAll('#class-grid > div').forEach(el => el.classList.remove('card-selected'));
-            document.getElementById(`card-class-${id}`).classList.add('card-selected');
+        function removerItemCriacao(idx) {
+            gameState.character.inventario.splice(idx, 1);
+            renderCreationInventory();
         }
 
         async function verificarStatusAPI() {
@@ -467,73 +664,69 @@
             const statusText = document.getElementById('status-text');
 
             try {
-                const res = await fetch(`${API_URL}/status`, { signal: AbortSignal.timeout(4000) });
+                const res = await fetch(`${API_URL}/config`, { signal: AbortSignal.timeout(3000) });
                 if (res.ok) {
-                    const data = await res.json();
-                    if (data.ollama_conectado) {
-                        statusDot.className = "w-2.5 h-2.5 rounded-full bg-green-500 online-pulse";
-                        statusText.textContent = "IA Online";
-                        statusText.className = "text-green-400";
-                    } else {
-                        statusDot.className = "w-2.5 h-2.5 rounded-full bg-yellow-500";
-                        statusText.textContent = "Ollama Offline";
-                        statusText.className = "text-yellow-400";
-                    }
+                    statusDot.className = "w-2.5 h-2.5 rounded-full bg-green-500 online-pulse";
+                    statusText.textContent = "API Conectada";
+                    statusText.className = "text-green-400 hidden sm:inline";
+                    document.getElementById('modal-offline').classList.add('hidden');
                 } else {
                     throw new Error();
                 }
             } catch (e) {
                 statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-500 offline-pulse";
                 statusText.textContent = "API Desconectada";
-                statusText.className = "text-red-400";
+                statusText.className = "text-red-400 hidden sm:inline";
             }
         }
 
-        function toggleApiModal() {
-            document.getElementById('modal-api').classList.toggle('hidden');
+        function tentarReconectarAPI() {
+            verificarStatusAPI().then(() => {
+                if (document.getElementById('status-dot').classList.contains('bg-green-500')) {
+                    alertToast('Reconectado com sucesso!');
+                } else {
+                    alertToast('Ainda não foi possível conectar ao backend.');
+                }
+            });
         }
 
-        function salvarConfiguracaoAPI() {
-            const url = document.getElementById('input-api-url').value.trim().replace(/\/$/, '');
-            if (url) {
-                API_URL = url;
-                localStorage.setItem('mestre_api_url', API_URL);
-                toggleApiModal();
-                verificarStatusAPI();
+        function ativarModoSimulacao() {
+            gameState.isOfflineSimulation = true;
+            document.getElementById('modal-offline').classList.add('hidden');
+            alertToast('Modo de Simulação ativado! O Mestre responderá localmente.');
+            if (document.getElementById('screen-game').classList.contains('hidden')) {
+                iniciarAventuraLocalSimulado();
             }
         }
 
         async function iniciarAventura() {
-            const nameInput = document.getElementById('char-name').value.trim();
-            if (!nameInput) {
-                alertToast('Por favor, informe o nome do seu personagem!');
+            const nome = document.getElementById('create-name').value.trim();
+            const raca = document.getElementById('create-race').value.trim();
+            const classe = document.getElementById('create-class').value.trim();
+            const historico = document.getElementById('create-history').value.trim();
+
+            if (!nome || !raca || !classe) {
+                alertToast('Por favor, preencha o Nome, Raça e Classe!');
                 return;
             }
 
-            const raceObj = RACES.find(r => r.id === selectedRace);
-            const classObj = CLASSES.find(c => c.id === selectedClass);
+            gameState.character.nome = nome;
+            gameState.character.raca = raca;
+            gameState.character.classe = classe;
+            gameState.character.historico = historico || 'Aventureiro destemido em busca de glória.';
 
-            gameState.character = {
-                nome: nameInput,
-                raca: raceObj.nome,
-                classe: classObj.nome,
-                historico_atributos: `Bônus Racial: ${raceObj.bonus}. Habilidades: ${classObj.hab}.`,
-                hpCurrent: classObj.hp,
-                hpMax: classObj.hp,
-                inventory: [...classObj.equip]
-            };
-
-            gameState.chatHistory = [];
-            
-            // Trocar tela
             carregarTelaJogo();
 
-            // Fazer chamada ao servidor
+            if (gameState.isOfflineSimulation) {
+                iniciarAventuraLocalSimulado();
+                return;
+            }
+
             setLoading(true);
-            adicionarMensagemSistema("O Mestre está preparando o mundo e tecendo sua narrativa inicial...");
+            adicionarMensagemSistema("Conectando ao Mestre e inicializando a campanha...");
 
             try {
-                const response = await fetch(`${API_URL}/iniciar_jogo`, {
+                const res = await fetch(`${API_URL}/iniciar_jogo`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -541,27 +734,38 @@
                             nome: gameState.character.nome,
                             raca: gameState.character.raca,
                             classe: gameState.character.classe,
-                            historico_atributos: gameState.character.historico_atributos
+                            historico_atributos: `Atributos: ${JSON.stringify(gameState.character.atributos)}. ${gameState.character.historico}`,
+                            inventario: gameState.character.inventario
                         },
-                        modelo: "llama3"
+                        localizacao_inicial: gameState.location.nome,
+                        coord_iniciais: gameState.location.coords
                     })
                 });
 
-                if (!response.ok) throw new Error("Erro ao consultar a API.");
+                if (!res.ok) throw new Error("Erro de comunicação com a API.");
 
-                const data = await response.json();
-                const introducao = data.introducao;
+                const data = await res.json();
+                processarRespostaMestre(data);
 
-                // Adicionar mensagem no histórico
-                gameState.chatHistory.push({ role: 'assistant', content: introducao });
-                renderChatLog();
-                salvarLocalStorage();
-
-            } catch (error) {
-                adicionarMensagemSistema(`❌ Não foi possível conectar ao Mestre (${API_URL}). Verifique se o servidor FastAPI está rodando.`, 'erro');
+            } catch (e) {
+                document.getElementById('offline-url-display').textContent = API_URL;
+                document.getElementById('modal-offline').classList.remove('hidden');
             } finally {
                 setLoading(false);
             }
+        }
+
+        function iniciarAventuraLocalSimulado() {
+            const dataSimulada = {
+                narrative: `Bem-vindo, ${gameState.character.nome}! Você se encontra na praça central de Valória. O ar está fresco e os mercadores gritam suas mercadorias. Ao norte, as Montanhas Sombrias se erguem no horizonte. O que você deseja fazer?`,
+                current_location: "Praça de Valória",
+                map_coordinates: { x: 0, y: 0 },
+                quest_update: [
+                    { id: "q01", titulo: "O Início da Jornada", descricao: "Explore os arredores da Vila de Valória.", status: "ativa" }
+                ],
+                requires_dice_check: false
+            };
+            processarRespostaMestre(dataSimulada);
         }
 
         async function enviarAcao() {
@@ -572,123 +776,111 @@
             if (!acao) return;
 
             input.value = '';
+            document.getElementById('dice-required-banner').classList.add('hidden');
 
-            // Adicionar ao histórico do jogador
+            // Adicionar ação do jogador ao histórico
             gameState.chatHistory.push({ role: 'user', content: acao });
+            gameState.turnCounter++;
             renderChatLog();
             setLoading(true);
 
-            try {
-                // Formatar histórico para envio (últimas 10 mensagens para não estourar o contexto)
-                const historicoEnvio = gameState.chatHistory.slice(-10).map(m => ({
-                    role: m.role,
-                    content: m.content
-                }));
+            if (gameState.isOfflineSimulation) {
+                setTimeout(() => {
+                    const respostaSimulada = {
+                        narrative: `Você decide: "${acao}". O ambiente ao seu redor reage imediatamente à sua presença. As pessoas observam seus movimentos com atenção.`,
+                        current_location: gameState.location.nome,
+                        map_coordinates: { x: gameState.location.coords.x + (Math.floor(Math.random() * 3) - 1), y: gameState.location.coords.y + (Math.floor(Math.random() * 3) - 1) },
+                        quest_update: gameState.quests,
+                        requires_dice_check: acao.toLowerCase().includes('ataco') || acao.toLowerCase().includes('pulo')
+                    };
+                    processarRespostaMestre(respostaSimulada);
+                    setLoading(false);
+                }, 800);
+                return;
+            }
 
-                const response = await fetch(`${API_URL}/narrar`, {
+            try {
+                const res = await fetch(`${API_URL}/narrar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         acao_jogador: acao,
-                        historico: historicoEnvio,
+                        historico: gameState.chatHistory.slice(-10),
                         personagem: {
                             nome: gameState.character.nome,
                             raca: gameState.character.raca,
                             classe: gameState.character.classe,
-                            historico_atributos: gameState.character.historico_atributos
+                            historico_atributos: `Atributos: ${JSON.stringify(gameState.character.atributos)}. ${gameState.character.historico}`,
+                            inventario: gameState.character.inventario
                         },
-                        modelo: "llama3"
+                        localizacao_atual: gameState.location.nome,
+                        coord_atuais: gameState.location.coords,
+                        quests_ativas: gameState.quests
                     })
                 });
 
-                if (!response.ok) throw new Error("Falha na narração do Mestre.");
+                if (!res.ok) throw new Error("Erro ao narrar.");
 
-                const data = await response.json();
-                gameState.chatHistory.push({ role: 'assistant', content: data.resposta_mestre });
-                renderChatLog();
-                salvarLocalStorage();
+                const data = await res.json();
+                processarRespostaMestre(data);
 
-            } catch (error) {
-                adicionarMensagemSistema("⚠️ O Mestre não conseguiu responder. Verifique a conexão com o backend.", 'erro');
+            } catch (e) {
+                document.getElementById('modal-offline').classList.remove('hidden');
             } finally {
                 setLoading(false);
             }
         }
 
-        function tratarTeclaEnter(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                enviarAcao();
+        function processarRespostaMestre(data) {
+            if (data.narrative) {
+                gameState.chatHistory.push({ role: 'assistant', content: data.narrative });
             }
+
+            if (data.current_location) {
+                gameState.location.nome = data.current_location;
+                document.getElementById('loc-name-display').textContent = data.current_location;
+            }
+
+            if (data.map_coordinates) {
+                gameState.location.coords = data.map_coordinates;
+                document.getElementById('map-coord-display').textContent = `(${data.map_coordinates.x}, ${data.map_coordinates.y})`;
+                drawMap();
+            }
+
+            if (data.quest_update && Array.isArray(data.quest_update)) {
+                data.quest_update.forEach(qNew => {
+                    const idx = gameState.quests.findIndex(q => q.id === qNew.id);
+                    if (idx >= 0) gameState.quests[idx] = qNew;
+                    else gameState.quests.push(qNew);
+                });
+            }
+
+            if (data.requires_dice_check) {
+                document.getElementById('dice-required-banner').classList.remove('hidden');
+            }
+
+            renderChatLog();
+            renderQuestsAndSheet();
+            salvarLocalStorage();
         }
 
         function carregarTelaJogo() {
             document.getElementById('screen-creation').classList.add('hidden');
             document.getElementById('screen-game').classList.remove('hidden');
 
-            // Atualizar Ficha
             document.getElementById('sheet-name').textContent = gameState.character.nome;
             document.getElementById('sheet-race-class').textContent = `${gameState.character.raca} | ${gameState.character.classe}`;
-            document.getElementById('sheet-traits').textContent = gameState.character.historico_atributos;
+            document.getElementById('sheet-history').textContent = gameState.character.historico;
 
-            atualizarBarraHP();
-            renderInventario();
-        }
-
-        function atualizarBarraHP() {
-            const { hpCurrent, hpMax } = gameState.character;
-            document.getElementById('hp-text').textContent = `${hpCurrent} / ${hpMax}`;
-            const pct = Math.max(0, Math.min(100, (hpCurrent / hpMax) * 100));
-            document.getElementById('hp-bar-fill').style.width = `${pct}%`;
-        }
-
-        function alterarHP(delta) {
-            gameState.character.hpCurrent = Math.max(0, Math.min(gameState.character.hpMax, gameState.character.hpCurrent + delta));
-            atualizarBarraHP();
-            salvarLocalStorage();
-        }
-
-        function renderInventario() {
-            const ul = document.getElementById('inventory-list');
-            ul.innerHTML = gameState.character.inventory.map((item, idx) => `
-                <li class="flex justify-between items-center bg-black/40 px-2 py-1 rounded border border-white/5">
-                    <span class="text-textLight">${item}</span>
-                    <button onclick="removerItemInventario(${idx})" class="text-gray-500 hover:text-crimsonBright font-bold ml-2">×</button>
-                </li>
-            `).join('');
-        }
-
-        function adicionarItemInventario() {
-            const novo = prompt('Nome do item para adicionar:');
-            if (novo && novo.trim()) {
-                gameState.character.inventory.push(novo.trim());
-                renderInventario();
-                salvarLocalStorage();
-            }
-        }
-
-        function removerItemInventario(index) {
-            gameState.character.inventory.splice(index, 1);
-            renderInventario();
-            salvarLocalStorage();
-        }
-
-        function rolarDado(lados) {
-            playDiceSound();
-            const btn = event.currentTarget;
-            btn.classList.add('animate-dice-roll');
-            setTimeout(() => btn.classList.remove('animate-dice-roll'), 500);
-
-            const resultado = Math.floor(Math.random() * lados) + 1;
-            document.getElementById('dice-last-result').textContent = `d${lados}: [ ${resultado} ]`;
-
-            // Registrar rolagem no chat local
-            adicionarMensagemSistema(`🎲 Rolagem de Dado: **d${lados}** -> **${resultado}**`);
+            renderQuestsAndSheet();
+            drawMap();
         }
 
         function renderChatLog() {
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
+
+            document.getElementById('chat-turn-counter').textContent = `Turno ${gameState.turnCounter}`;
 
             gameState.chatHistory.forEach(msg => {
                 const div = document.createElement('div');
@@ -698,10 +890,10 @@
                     div.className += " mr-auto";
                     div.innerHTML = `
                         <span class="text-[11px] font-cinzel text-goldAccent font-bold tracking-wider flex items-center gap-1">
-                            <span>🧙‍♂️</span> Mestre das Sombras
+                            <span>🔮</span> Mestre das Sombras
                         </span>
                         <div class="bg-parchmentBg border-l-2 border-goldAccent p-3.5 rounded-r-lg shadow-md text-textLight text-sm leading-relaxed whitespace-pre-wrap">
-                            ${formatarTextoMestre(msg.content)}
+                            ${formatarNarrativa(msg.content)}
                         </div>
                     `;
                 } else {
@@ -710,7 +902,7 @@
                         <span class="text-[11px] font-cinzel text-textMuted font-bold">
                             ${gameState.character.nome} (Você)
                         </span>
-                        <div class="bg-cardBg border border-goldAccent/20 p-3 rounded-l-lg shadow-md text-textLight text-sm leading-relaxed">
+                        <div class="bg-playerBubble border border-goldAccent/30 p-3 rounded-l-lg shadow-md text-textLight text-sm leading-relaxed">
                             ${escapeHTML(msg.content)}
                         </div>
                     `;
@@ -721,105 +913,324 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function adicionarMensagemSistema(texto, tipo = 'info') {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = "mx-auto text-center my-2 max-w-md";
-            
-            const colorClass = tipo === 'erro' ? 'text-red-400 bg-red-950/30 border-red-800' : 'text-goldAccent bg-black/40 border-goldAccent/20';
-            
-            div.innerHTML = `
-                <span class="inline-block px-3 py-1 text-xs font-mono border rounded-full ${colorClass}">
-                    ${texto}
-                </span>
-            `;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
+        function formatarNarrativa(texto) {
+            let res = escapeHTML(texto);
+            res = res.replace(/d(20|12|10|8|6|4)/gi, '<strong class="text-amber-300 font-mono">$&</strong>');
+            return res;
         }
 
-        function formatarTextoMestre(texto) {
-            // Destacar termos entre aspas ou pedidos de rolagem de dados
-            let formatado = escapeHTML(texto);
-            formatado = formatado.replace(/d(20|12|10|8|6|4)/gi, '<strong class="text-amber-300 font-mono">$&</strong>');
-            return formatado;
+        function renderQuestsAndSheet() {
+            // Render Quests
+            const activeContainer = document.getElementById('active-quests-list');
+            const completedContainer = document.getElementById('completed-quests-list');
+
+            const activeQuests = gameState.quests.filter(q => q.status === 'ativa');
+            const otherQuests = gameState.quests.filter(q => q.status !== 'ativa');
+
+            activeContainer.innerHTML = activeQuests.length ? activeQuests.map(q => `
+                <div class="bg-black/50 p-2.5 rounded border-l-2 border-goldAccent border-y border-r border-white/5 space-y-1">
+                    <span class="font-cinzel text-xs font-bold text-goldHover block">${q.titulo}</span>
+                    <p class="text-[11px] text-textMuted leading-snug">${q.descricao}</p>
+                </div>
+            `).join('') : '<p class="text-[11px] text-textMuted italic">Nenhuma missão ativa no momento.</p>';
+
+            completedContainer.innerHTML = otherQuests.map(q => `
+                <div class="bg-black/30 p-2 rounded border border-white/5 text-[11px] flex justify-between items-center">
+                    <span class="text-gray-400 line-through">${q.titulo}</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded ${q.status === 'concluida' ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}">${q.status}</span>
+                </div>
+            `).join('');
+
+            // Render Sheet Attributes
+            const attrGrid = document.getElementById('sheet-attributes-grid');
+            attrGrid.innerHTML = Object.entries(gameState.character.atributos).map(([k, v]) => `
+                <div class="bg-black/40 p-1.5 rounded border border-goldAccent/10 flex justify-between px-2">
+                    <span class="text-goldAccent font-bold">${k}</span>
+                    <span class="text-textLight">${v}</span>
+                </div>
+            `).join('');
+
+            // Render Sheet Inventory
+            const invList = document.getElementById('sheet-inventory-list');
+            invList.innerHTML = gameState.character.inventario.map((item, idx) => `
+                <li class="flex justify-between items-center bg-black/40 px-2 py-1 rounded border border-white/5">
+                    <span class="text-textLight">${item}</span>
+                    <button onclick="removerItemJogo(${idx})" class="text-gray-500 hover:text-crimsonBright font-bold">×</button>
+                </li>
+            `).join('');
         }
 
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+        function switchTab(tab) {
+            document.getElementById('tab-btn-quests').className = tab === 'quests' ? 'py-1.5 rounded text-goldAccent bg-goldAccent/20' : 'py-1.5 rounded text-textMuted hover:text-textLight';
+            document.getElementById('tab-btn-sheet').className = tab === 'sheet' ? 'py-1.5 rounded text-goldAccent bg-goldAccent/20' : 'py-1.5 rounded text-textMuted hover:text-textLight';
+
+            document.getElementById('tab-content-quests').classList.toggle('hidden', tab !== 'quests');
+            document.getElementById('tab-content-sheet').classList.toggle('hidden', tab !== 'sheet');
         }
 
+        function adicionarItemJogo() {
+            const item = prompt('Nome do item para adicionar:');
+            if (item && item.trim()) {
+                gameState.character.inventario.push(item.trim());
+                renderQuestsAndSheet();
+                salvarLocalStorage();
+            }
+        }
+
+        function removerItemJogo(idx) {
+            gameState.character.inventario.splice(idx, 1);
+            renderQuestsAndSheet();
+            salvarLocalStorage();
+        }
+
+        function setupMapCanvas() {
+            const canvas = document.getElementById('game-map-canvas');
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                drawMap();
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            setTimeout(resizeCanvas, 100);
+
+            // Drag/Pan Controls
+            canvas.addEventListener('mousedown', e => {
+                isDraggingMap = true;
+                dragStart = { x: e.clientX - mapPanOffset.x, y: e.clientY - mapPanOffset.y };
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (!isDraggingMap) return;
+                mapPanOffset = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
+                drawMap();
+            });
+
+            window.addEventListener('mouseup', () => isDraggingMap = false);
+        }
+
+        function drawMap() {
+            const canvas = document.getElementById('game-map-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Background terrain color
+            ctx.fillStyle = '#0c0e14';
+            ctx.fillRect(0, 0, width, height);
+
+            const tileSize = 40 * mapZoomLevel;
+            const centerX = width / 2 + mapPanOffset.x;
+            const centerY = height / 2 + mapPanOffset.y;
+
+            // Draw Grid Lines
+            ctx.strokeStyle = '#1d2232';
+            ctx.lineWidth = 1;
+
+            const gridRadius = 15;
+            for (let x = -gridRadius; x <= gridRadius; x++) {
+                for (let y = -gridRadius; y <= gridRadius; y++) {
+                    const drawX = centerX + x * tileSize;
+                    const drawY = centerY - y * tileSize;
+
+                    ctx.strokeRect(drawX - tileSize / 2, drawY - tileSize / 2, tileSize, tileSize);
+
+                    // Procedural landmark dots for atmosphere
+                    const seed = (x * 73 + y * 37) % 10;
+                    if (seed === 0) {
+                        ctx.fillStyle = '#16231a';
+                        ctx.fillRect(drawX - tileSize / 4, drawY - tileSize / 4, tileSize / 2, tileSize / 2);
+                    }
+                }
+            }
+
+            // Draw Origin (0,0) Marker
+            ctx.fillStyle = '#d4af37';
+            ctx.font = `${Math.max(10, 10 * mapZoomLevel)}px Cinzel`;
+            ctx.textAlign = 'center';
+
+            // Draw Player Position Beacon
+            const px = centerX + gameState.location.coords.x * tileSize;
+            const py = centerY - gameState.location.coords.y * tileSize;
+
+            // Pulsing circle
+            ctx.beginPath();
+            ctx.arc(px, py, 14 * mapZoomLevel, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
+            ctx.fill();
+
+            // Player Pin
+            ctx.beginPath();
+            ctx.arc(px, py, 6 * mapZoomLevel, 0, Math.PI * 2);
+            ctx.fillStyle = '#f3c948';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Player Icon label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${Math.max(10, 11 * mapZoomLevel)}px Cinzel`;
+            ctx.fillText(gameState.character.nome || 'Herói', px, py - 12 * mapZoomLevel);
+        }
+
+        function mapZoom(factor) {
+            mapZoomLevel = Math.max(0.5, Math.min(2.5, mapZoomLevel * factor));
+            drawMap();
+        }
+
+        function mapRecenter() {
+            mapPanOffset = { x: 0, y: 0 };
+            drawMap();
+        }
+
+        function rolard20() {
+            playSynthesizedSound('dice');
+            const visual = document.getElementById('dice-visual');
+            visual.classList.add('animate-dice');
+
+            setTimeout(() => visual.classList.remove('animate-dice'), 600);
+
+            const result = Math.floor(Math.random() * 20) + 1;
+            gameState.lastDiceRoll = result;
+
+            const badge = document.getElementById('dice-result-badge');
+            const numDisplay = document.getElementById('dice-number');
+
+            numDisplay.textContent = result;
+
+            if (result === 20) {
+                badge.textContent = '20! (CRÍTICO)';
+                badge.className = 'font-mono text-amber-300 font-black animate-bounce';
+            } else if (result === 1) {
+                badge.textContent = '1 (FALHA)';
+                badge.className = 'font-mono text-red-500 font-black';
+            } else {
+                badge.textContent = `Resultado: ${result}`;
+                badge.className = 'font-mono text-amber-300 font-bold';
+            }
+        }
+
+        function usarResultadoNoChat() {
+            if (!gameState.lastDiceRoll) {
+                rolard20();
+            }
+            const input = document.getElementById('action-input');
+            input.value = `${input.value} [Resultado do d20: ${gameState.lastDiceRoll}]`.trim();
+        }
+
+        function salvarLocalStorage() {
+            localStorage.setItem('chronicles_sandbox_autosave', JSON.stringify(gameState));
+        }
+
+        function salvarJogoManual() {
+            salvarLocalStorage();
+            alertToast('Progresso salvo no navegador!');
+        }
+
+        function exportarSaveJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", `save_${gameState.character.nome || 'heroi'}_t${gameState.turnCounter}.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function importarSaveJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if (parsed.character && parsed.character.nome) {
+                        gameState = parsed;
+                        carregarTelaJogo();
+                        renderChatLog();
+                        renderQuestsAndSheet();
+                        drawMap();
+                        salvarLocalStorage();
+                        alertToast('Save importado com sucesso!');
+                    } else throw new Error();
+                } catch(err) {
+                    alertToast('Arquivo de save inválido.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmarNovoJogo() {
+            if (confirm("Deseja iniciar um novo jogo? Todo progresso não exportado será reiniciado.")) {
+                localStorage.removeItem('chronicles_sandbox_autosave');
+                location.reload();
+            }
+        }
+
+        function toggleConfigModal() {
+            document.getElementById('modal-config').classList.toggle('hidden');
+        }
+
+        function salvarConfiguracaoIA() {
+            API_URL = document.getElementById('cfg-api-url').value.trim().replace(/\/$/, '');
+            localStorage.setItem('rpg_sandbox_api_url', API_URL);
+
+            gameState.aiConfig.model_name = document.getElementById('cfg-model-name').value.trim();
+            gameState.aiConfig.temperature = parseFloat(document.getElementById('cfg-temp').value);
+            gameState.aiConfig.system_prompt = document.getElementById('cfg-system-prompt').value;
+
+            toggleConfigModal();
+            verificarStatusAPI();
+            alertToast('Configurações salvas!');
+        }
+
+        async function testarConexaoConfig() {
+            try {
+                const res = await fetch(`${API_URL}/config`);
+                if (res.ok) alertToast('Conexão com API bem sucedida!');
+                else throw new Error();
+            } catch(e) {
+                alertToast('Não foi possível conectar na URL configurada.');
+            }
+        }
+
+        // Utilities
         function setLoading(loading) {
             gameState.isWaitingApi = loading;
             document.getElementById('loading-indicator').classList.toggle('hidden', !loading);
             document.getElementById('btn-send-action').disabled = loading;
         }
 
-        function salvarLocalStorage() {
-            localStorage.setItem('mestre_rpg_autosave', JSON.stringify(gameState));
+        function adicionarMensagemSistema(txt) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = "mx-auto text-center my-2 max-w-md";
+            div.innerHTML = `<span class="inline-block px-3 py-1 text-xs font-mono border rounded-full bg-black/40 border-goldAccent/20 text-goldAccent">${txt}</span>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
 
-        function salvarJogoManual() {
-            salvarLocalStorage();
-            alertToast('Progresso salvo com sucesso no navegador!');
-        }
-
-        function carregarJogoManual() {
-            const data = localStorage.getItem('mestre_rpg_autosave');
-            if (data) {
-                gameState = JSON.parse(data);
-                carregarTelaJogo();
-                renderChatLog();
-                alertToast('Sessão restaurada!');
-            } else {
-                alertToast('Nenhum save encontrado no armazenamento local.');
+        function tratarTeclaEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                enviarAcao();
             }
         }
 
-        function exportarSaveJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `mestre_rpg_save_${gameState.character.nome || 'heroi'}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
-        function importarSaveJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    if (importedState.character && importedState.character.nome) {
-                        gameState = importedState;
-                        carregarTelaJogo();
-                        renderChatLog();
-                        salvarLocalStorage();
-                        alertToast('Save importado com sucesso!');
-                    } else {
-                        throw new Error('Formato inválido');
-                    }
-                } catch (err) {
-                    alertToast('Erro ao importar arquivo JSON de save inválido.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function reiniciarJogoConfirmacao() {
-            if (confirm("Tem certeza que deseja abandonar este jogo? Todo o progresso não exportado será perdido.")) {
-                localStorage.removeItem('mestre_rpg_autosave');
-                location.reload();
-            }
-        }
-
-        function alertToast(mensagem) {
-            adicionarMensagemSistema(`📢 ${mensagem}`);
+        function alertToast(msg) {
+            adicionarMensagemSistema(`📢 ${msg}`);
         }
     </script>
 </body>
